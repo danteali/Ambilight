@@ -103,10 +103,10 @@ static final int timeout = 5000; // 5 seconds
 // effectively use the central scale percentage of each dimension of the
 // screen to calculate the sampling coordinates.
 
-//static final boolean useXScaling = true;
-//static final boolean useYScaling = true;
+static final boolean useXScaling = true;
+static final boolean useYScaling = true;
 static final int displays[][] = new int[][] {
-   {0,18,11}//, 100, 100} // Screen 0, 18 LEDs across, 11 LEDs down, ??% X scaling ??% Y
+   {0,18,11,100,100} // Screen 0, 18 LEDs across, 11 LEDs down, ??% X scaling ??% Y
 // Note that the corner LEDs are counted twice - each row/column number includes the corners.
 //  ,{?,24,16, 100, 100} // Screen ?, also 24 LEDs across and 16 LEDs down. no scaling
 };
@@ -174,9 +174,9 @@ void setup() {
   // NEW LINE ADDED (from https://forums.adafruit.com/viewtopic.php?f=25&t=34404&p=170179&hilit=letterbox#p372406)
   // This allows scaling of the sampling area for the LED colour. This means you can still get colours for letterboxed video.
   // ========================================================================================================================
-  //float                   f, range, step, start, scalingOffset;
+  float                   f, range, step, start, scalingOffset;
   // Original code:
-  float                   f, range, step, start;
+  //float                   f, range, step, start;
   // ========================================================================================================================
   
   dh = new DisposeHandler(this); // Init DisposeHandler ASAP
@@ -236,37 +236,36 @@ void setup() {
     // NEW SECTION ADDED (from https://forums.adafruit.com/viewtopic.php?f=25&t=34404&p=170179&hilit=letterbox#p372406)
     // This allows scaling of the sampling area for the LED colour. This means you can still get colours for letterboxed video.
     // ========================================================================================================================
+    scalingOffset = 0.0;
+    range = (float)dispBounds[d].width / (float)displays[d][1]; 
+    if(useXScaling == true) {    
+      range *= (float)displays[d][3] / 100.0;
+      scalingOffset = (100.0 - (float)displays[d][3]) / 200.0 * (float)dispBounds[d].width;   
+    }
+    step  = range / 16.0;
+    start = scalingOffset + range * (float)leds[i][1] + step * 0.5;
+    for(col=0; col<16; col++) x[col] = (int)(start + step * (float)col);
     
-    //scalingOffset = 0.0;
-    //range = (float)dispBounds[d].width / (float)displays[d][1]; 
-    //if(useXScaling == true) {    
-    //  range *= (float)displays[d][3] / 100.0;
-    //  scalingOffset = (100.0 - (float)displays[d][3]) / 200.0 * (float)dispBounds[d].width;   
-    //}
-    //step  = range / 16.0;
-    //start = scalingOffset + range * (float)leds[i][1] + step * 0.5;
-    //for(col=0; col<16; col++) x[col] = (int)(start + step * (float)col);
-    //
-    //scalingOffset = 0.0;
-    //range = (float)dispBounds[d].height / (float)displays[d][2]; 
-    //if(useYScaling == true) {        
-    //  range *= (float)displays[d][4] / 100.0;
-    //  scalingOffset = (100.0 - (float)displays[d][4]) / 200.0 * (float)dispBounds[d].height;
-    //}
-    //step  = range / 16.0;
-    //start = scalingOffset + range * (float)leds[i][2] + step * 0.5;
-    //for(row=0; row<16; row++) y[row] = (int)(start + step * (float)row);
+    scalingOffset = 0.0;
+    range = (float)dispBounds[d].height / (float)displays[d][2]; 
+    if(useYScaling == true) {        
+      range *= (float)displays[d][4] / 100.0;
+      scalingOffset = (100.0 - (float)displays[d][4]) / 200.0 * (float)dispBounds[d].height;
+    }
+    step  = range / 16.0;
+    start = scalingOffset + range * (float)leds[i][2] + step * 0.5;
+    for(row=0; row<16; row++) y[row] = (int)(start + step * (float)row);
     
     // Original code:
     // Precompute columns, rows of each sampled point for this LED
-     range = (float)dispBounds[d].width / (float)displays[d][1];
-     step  = range / 16.0;
-     start = range * (float)leds[i][1] + step * 0.5;
-     for(col=0; col<16; col++) x[col] = (int)(start + step * (float)col);
-     range = (float)dispBounds[d].height / (float)displays[d][2];
-     step  = range / 16.0;
-     start = range * (float)leds[i][2] + step * 0.5;
-     for(row=0; row<16; row++) y[row] = (int)(start + step * (float)row);
+    // range = (float)dispBounds[d].width / (float)displays[d][1];
+    // step  = range / 16.0;
+    // start = range * (float)leds[i][1] + step * 0.5;
+    // for(col=0; col<16; col++) x[col] = (int)(start + step * (float)col);
+    // range = (float)dispBounds[d].height / (float)displays[d][2];
+    // step  = range / 16.0;
+    // start = range * (float)leds[i][2] + step * 0.5;
+    // for(row=0; row<16; row++) y[row] = (int)(start + step * (float)row);
     // ========================================================================================================================
   
     if(useFullScreenCaps == true) {
